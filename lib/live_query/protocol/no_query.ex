@@ -1,6 +1,7 @@
 defmodule LiveQuery.Protocol.NoQuery do
   @moduledoc """
-  TODO
+  Returned whenever a operation is attepted against a query that doesn't exist.
+  The only exception is `LiveQuery.Protocol.Link` and `LiveQuery.Protocol.Unlink`.
   """
 
   @enforce_keys [:query_key]

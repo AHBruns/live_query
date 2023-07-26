@@ -38,46 +38,30 @@ defmodule LiveQuery.Query.Server.State do
   end
 
   def register_callback(state = %__MODULE__{}, client_pid, cb_key, cb) do
-    state =
-      Map.update!(state, :callbacks, fn callbacks ->
-        callbacks
-        |> Map.put_new(client_pid, %{})
-        |> Map.update!(client_pid, fn client_callbacks ->
-          Map.put(client_callbacks, cb_key, cb)
-        end)
+    Map.update!(state, :callbacks, fn callbacks ->
+      callbacks
+      |> Map.put_new(client_pid, %{})
+      |> Map.update!(client_pid, fn client_callbacks ->
+        Map.put(client_callbacks, cb_key, cb)
       end)
-
-    {state,
-     %LiveQuery.Internal.CallbackRegistered{
-       query_key: state.key,
-       cb_key: cb_key,
-       client_pid: client_pid
-     }}
+    end)
   end
 
   def unregister_callback(state = %__MODULE__{}, client_pid, cb_key) do
-    state =
-      Map.update!(state, :callbacks, fn callbacks ->
-        callbacks =
-          callbacks
-          |> Map.put_new(client_pid, %{})
-          |> Map.update!(client_pid, fn client_callbacks ->
-            Map.delete(client_callbacks, cb_key)
-          end)
+    Map.update!(state, :callbacks, fn callbacks ->
+      callbacks =
+        callbacks
+        |> Map.put_new(client_pid, %{})
+        |> Map.update!(client_pid, fn client_callbacks ->
+          Map.delete(client_callbacks, cb_key)
+        end)
 
-        if map_size(callbacks[client_pid]) == 0 do
-          Map.delete(callbacks, client_pid)
-        else
-          callbacks
-        end
-      end)
-
-    {state,
-     %LiveQuery.Internal.CallbackUnregistered{
-       query_key: state.key,
-       cb_key: cb_key,
-       client_pid: client_pid
-     }}
+      if map_size(callbacks[client_pid]) == 0 do
+        Map.delete(callbacks, client_pid)
+      else
+        callbacks
+      end
+    end)
   end
 
   def unregister_all_callbacks(state = %__MODULE__{}, client_pid) do

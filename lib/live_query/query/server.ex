@@ -9,58 +9,12 @@ defmodule LiveQuery.Query.Server do
     GenServer.start_link(__MODULE__, opts)
   end
 
-  def read(query_server, opts) do
-    GenServer.call(query_server, %LiveQuery.Internal.Read{
-      query_key: opts[:query_key],
-      selector: opts[:selector]
-    })
-  end
-
-  def register_callback(query_server, opts) do
-    GenServer.call(query_server, %LiveQuery.Internal.RegisterCallback{
-      query_key: opts[:query_key],
-      client_pid: opts[:client_pid],
-      cb_key: opts[:cb_key],
-      cb: opts[:cb]
-    })
-  end
-
-  def unregister_callback(query_server, opts) do
-    GenServer.call(query_server, %LiveQuery.Internal.UnregisterCallback{
-      query_key: opts[:query_key],
-      client_pid: opts[:client_pid],
-      cb_key: opts[:cb_key]
-    })
-  end
-
-  def unregister_all_callbacks(query_server, opts) do
-    GenServer.call(query_server, %LiveQuery.Internal.UnregisterAllCallbacks{
-      query_key: opts[:query_key],
-      client_pid: opts[:client_pid]
-    })
-  end
-
   @impl true
   def init(opts) do
     {:ok, State.new(opts)}
   end
 
   @impl true
-  def handle_call(msg = %LiveQuery.Internal.Read{}, _from, state = %State{}) do
-    {state, response} = State.read(state, msg.selector)
-    {:reply, response, state}
-  end
-
-  def handle_call(msg = %LiveQuery.Internal.RegisterCallback{}, _from, state = %State{}) do
-    {state, response} = State.register_callback(state, msg.client_pid, msg.cb_key, msg.cb)
-    {:reply, response, state}
-  end
-
-  def handle_call(msg = %LiveQuery.Internal.UnregisterCallback{}, _from, state = %State{}) do
-    {state, response} = State.unregister_callback(state, msg.client_pid, msg.cb_key)
-    {:reply, response, state}
-  end
-
   def handle_call(msg = %LiveQuery.Internal.UnregisterAllCallbacks{}, _from, state = %State{}) do
     {state, response} = State.unregister_all_callbacks(state, msg.client_pid)
     {:reply, response, state}
@@ -85,6 +39,22 @@ defmodule LiveQuery.Query.Server do
   end
 
   @impl true
+  def handle_cast(msg = %LiveQuery.Internal.Read{}, state = %State{}) do
+    {state, response} = State.read(state, msg.selector)
+    :ok = GenServer.cast(msg.proxy_pid, response)
+    {:noreply, state}
+  end
+
+  def handle_cast(msg = %LiveQuery.Internal.RegisterCallback{}, state = %State{}) do
+    state = State.register_callback(state, msg.client_pid, msg.cb_key, msg.cb)
+    {:noreply, state}
+  end
+
+  def handle_cast(msg = %LiveQuery.Internal.UnregisterCallback{}, state = %State{}) do
+    state = State.unregister_callback(state, msg.client_pid, msg.cb_key)
+    {:noreply, state}
+  end
+
   def handle_cast(msg, state = %State{}) do
     state = State.set_data(state, State.delegate_handle_cast(state, msg))
     {:noreply, state}

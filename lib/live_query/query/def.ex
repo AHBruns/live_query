@@ -1,12 +1,46 @@
 defmodule LiveQuery.Query.Def do
   @moduledoc """
-  TODO
+  This module defines the `LiveQuery.Query.Def` behaviour and struct.
+  The behaviour can be used to make a module-base query definition.
+  The struct can be used as a query definition itself.
   """
 
   @enforce_keys [:init]
   defstruct [:init, :handle_call, :handle_cast, :handle_info]
 
   @type data :: any
+  @type t :: %__MODULE__{
+          init: (state :: %{required(:key) => any, required(:config) => map} -> data),
+          handle_call:
+            (msg :: any,
+             from :: GenServer.from(),
+             state :: %{
+               required(:key) => any,
+               required(:config) => map,
+               optional(:data) => data
+             } ->
+               {:noreply, data} | {:reply, any, data})
+            | nil,
+          handle_cast:
+            (msg :: any,
+             state :: %{
+               required(:key) => any,
+               required(:config) => map,
+               optional(:data) => data
+             } ->
+               data)
+            | nil,
+          handle_info:
+            (msg :: any,
+             state :: %{
+               required(:key) => any,
+               required(:config) => map,
+               optional(:data) => data
+             } ->
+               data)
+            | nil
+        }
+
   @callback init(state :: %{required(:key) => any, required(:config) => map}) :: data
   @callback handle_call(
               msg :: any,
@@ -25,7 +59,8 @@ defmodule LiveQuery.Query.Def do
   @optional_callbacks [handle_call: 3, handle_cast: 2, handle_info: 2]
 
   @doc """
-  TODO
+  Just adds the `LiveQuery.Query.Def` behaviour to your module for you.
+  Modules which implement this behaviour can be used as a query definition.
   """
   defmacro __using__(_opts) do
     quote do
@@ -34,8 +69,38 @@ defmodule LiveQuery.Query.Def do
   end
 
   @doc """
-  TODO
+  Creates a new `LiveQuery.Query.Def` struct which implements the `LiveQuery.Query.DefLike` protocol.
   """
+  @spec new(%{
+          required(:init) =>
+            (state :: %{required(:key) => any, required(:config) => map} ->
+               data),
+          optional(:handle_call) =>
+            (msg :: any,
+             from :: GenServer.from(),
+             state :: %{
+               required(:key) => any,
+               required(:config) => map,
+               optional(:data) => data
+             } ->
+               {:noreply, data} | {:reply, any, data}),
+          optional(:handle_cast) =>
+            (msg :: any,
+             state :: %{
+               required(:key) => any,
+               required(:config) => map,
+               optional(:data) => data
+             } ->
+               data),
+          optional(:handle_info) =>
+            (msg :: any,
+             state :: %{
+               required(:key) => any,
+               required(:config) => map,
+               optional(:data) => data
+             } ->
+               data)
+        }) :: t
   def new(opts) do
     %__MODULE__{
       init: opts.init,

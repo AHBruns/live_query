@@ -1,6 +1,6 @@
 defmodule LiveQuery.Protocol.DataChanged do
   @moduledoc """
-  TODO
+  Given to a callback when the data for a query changes.
   """
 
   @enforce_keys [:query_key, :client_pid, :cb_key, :old_data, :new_data]

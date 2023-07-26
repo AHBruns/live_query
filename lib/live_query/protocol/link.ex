@@ -1,13 +1,16 @@
 defmodule LiveQuery.Protocol.Link do
   @moduledoc """
-  TODO
+  Link a client process to a query.
+  Once linked to a query, the client will be monitored, and the query will be guaranteed to exist so long as the client is alive and has manually unlinked from the query.
   """
 
   @enforce_keys [:client_pid, :query_key, :query_def, :query_config]
   defstruct [:client_pid, :query_key, :query_def, :query_config]
 
   @doc """
-  TODO
+  Create a new `LiveQuery.Protocol.Link` struct safely.
+  This validates the created struct will be considered valid by LiveQuery.
+  Prefer using this function over literal struct creation when possible.
   """
   def new(struct = %__MODULE__{}) do
     struct

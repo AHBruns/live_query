@@ -1,13 +1,15 @@
 defmodule LiveQuery.Protocol.Read do
   @moduledoc """
-  TODO
+  Read the value of a query (the query's init function will be called if it hasn't been called yet).
+  The `selector` function will be called with the query's value and before the result is returned.
   """
 
   @enforce_keys [:query_key, :selector]
   defstruct [:query_key, :selector]
 
   @doc """
-  TODO
+  Create a new `LiveQuery.Protocol.Read` struct.
+  If `selector` is not provided the indentity function will be used by default.
   """
   def new(struct = %__MODULE__{}) do
     struct

@@ -1,12 +1,15 @@
 defprotocol LiveQuery.Query.DefLike do
   @moduledoc """
-  TODO
+  A query definition defines how to load and maintain a query.
+  It's the blueprint of a query.
+  Anything that implements the `LiveQuery.Query.DefLike` protocol can be used as a query definition.
   """
 
   @type data :: any
 
   @doc """
-  TODO
+  Called when the query is initialized.
+  This is where the query should be loaded and any subscriptions should be setup.
   """
   @spec init(
           self :: t,
@@ -15,7 +18,8 @@ defprotocol LiveQuery.Query.DefLike do
   def init(self, state)
 
   @doc """
-  TODO
+  Your query process is like a GenServer.
+  You can handle calls, but you're limited in what you can return since queries don't allow for handle_continue.
   """
   @spec handle_call(
           self :: t,
@@ -26,7 +30,9 @@ defprotocol LiveQuery.Query.DefLike do
   def handle_call(self, msg, from, state)
 
   @doc """
-  TODO
+  Your query process is like a GenServer.
+  You can handle casts, but you're limited in what you can return since queries don't allow for handle_continue.
+  You must return your query's new value.
   """
   @spec handle_cast(
           self :: t,
@@ -36,7 +42,9 @@ defprotocol LiveQuery.Query.DefLike do
   def handle_cast(self, msg, state)
 
   @doc """
-  TODO
+  Your query process is like a GenServer.
+  You can handle messages, but you're limited in what you can return since queries don't allow for handle_continue.
+  You must return your query's new value.
   """
   @spec handle_info(
           self :: t,

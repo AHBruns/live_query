@@ -16,7 +16,7 @@ defmodule LiveQuery.MixProject do
       docs: [
         main: "LiveQuery"
       ],
-      version: "0.2.0",
+      version: "0.3.1",
       source_url: "https://github.com/AHBruns/live_query",
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,

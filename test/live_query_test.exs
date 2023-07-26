@@ -224,4 +224,28 @@ defmodule LiveQueryTest do
     assert LiveQuery.read(ctx[:name], query_key: ctx[:query_key]) ==
              %LiveQuery.Protocol.NoQuery{query_key: ctx[:query_key]}
   end
+
+  test "dependent queries work", ctx do
+    LiveQuery.link(ctx[:name],
+      query_key: {1, ctx[:query_key]},
+      query_def: fn _ctx -> :success end,
+      query_config: %{},
+      client_pid: self()
+    )
+
+    LiveQuery.link(ctx[:name],
+      query_key: {2, ctx[:query_key]},
+      query_def: fn _ctx ->
+        case LiveQuery.read(ctx[:name], query_key: {1, ctx[:query_key]}) do
+          %LiveQuery.Protocol.Data{value: value} -> value
+          _ -> :failure
+        end
+      end,
+      query_config: %{},
+      client_pid: self()
+    )
+
+    assert LiveQuery.read(ctx[:name], query_key: {2, ctx[:query_key]}) ==
+             %LiveQuery.Protocol.Data{query_key: {2, ctx[:query_key]}, value: :success}
+  end
 end
